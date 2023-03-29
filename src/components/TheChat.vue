@@ -1,54 +1,116 @@
 <template>
-  <div class="the-chat card mt-3">
-    <div class="card-body">
-      <div class="card-title">
-        <h3>Chat Group</h3>
-        <hr>
-      </div>
-      <div class="card-body">
-        <div class="messages">
+  <v-sheet
+    width="400"
+    class="mx-auto"
+  >
+    <v-form ref="form">
+      <v-text-field
+        v-model="name"
+        :counter="10"
+        :rules="nameRules"
+        label="Name"
+        required
+      />
 
-        </div>
-      </div>
-    </div>
-    <div class="card-footer">
-      <form @submit.prevent="sendMessage">
-        <div class="gorm-group">
-          <label for="user">User:</label>
-          <input type="text" v-model="user" class="form-control">
-        </div>
-        <div class="gorm-group pb-3">
-          <label for="message">Message:</label>
-          <input type="text" v-model="message" class="form-control">
-        </div>
+      <v-select
+        v-model="select"
+        :items="items"
+        :rules="[v => !!v || 'Item is required']"
+        label="Item"
+        required
+      />
+
+      <div class="d-flex flex-column">
         <v-btn
-            type="submit"
-            class="btn btn-success">Send</v-btn>
-      </form>
-    </div>
-  </div>
+          color="success"
+          class="mt-4"
+          block
+          @click="validate"
+        >
+          Validate
+        </v-btn>
+
+        <v-btn
+          color="error"
+          class="mt-4"
+          block
+          @click="reset"
+        >
+          Reset Form
+        </v-btn>
+
+        <v-btn
+          color="warning"
+          class="mt-4"
+          block
+          @click="resetValidation"
+        >
+          Reset Validation
+        </v-btn>
+      </div>
+    </v-form>
+  </v-sheet>
 </template>
 
 <script setup>
-import { reactive, toRefs } from 'vue'
-import { useChatStore } from '../stores/chat-store'
+  import { reactive, ref, toRefs } from 'vue'
+  import { useChatStore } from '../stores/chat-store'
 
-useChatStore().initChat()
+  useChatStore().initChat()
 
-const state = reactive({
-  user: '',
-  message: '',
-})
+  const state = reactive({
+    user: '',
+    message: '',
+    valid: true,
+    name: '',
+    nameRules: [
+      v => !!v || 'Name is required',
+      v => (v && v.length <= 10) || 'Name must be less than 10 characters',
+    ],
+    select: null,
+    items: [
+      'Item 1',
+      'Item 2',
+      'Item 3',
+      'Item 4',
+    ],
+    checkbox: false,
+  })
 
-const { user, message } = toRefs(state)
+  const {
+    // user,
+    // message,
+    name,
+    nameRules,
+    select,
+    items,
+  } = toRefs(state)
 
-const sendMessage = () => {
-  useChatStore().sendMessage({
-    user: user.value,
-    message: message.value
-  });
+  // const sendMessage = () => {
+  //   useChatStore().sendMessage({
+  //     user: user.value,
+  //     message: message.value
+  //   });
+  //
+  //   state.message = ''
+  // }
 
-  state.message = ''
-}
+  const form = ref(null)
+
+  const validate = async() => {
+    const { valid } = await form.value.validate()
+
+    if (valid) {
+      alert('Form is valid')
+    }
+  }
+
+  const reset = () => {
+    form.value.reset()
+  }
+
+  const resetValidation = () => {
+    form.value.resetValidation()
+  }
 
 </script>
