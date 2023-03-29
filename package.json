@@ -8,9 +8,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "express": "4",
     "pinia": "^2.0.32",
+    "socket.io": "^4.6.1",
+    "socket.io-client": "^4.6.1",
     "vue": "^3.2.47",
-    "vue-router": "^4.1.6"
+    "vue-router": "^4.1.6",
+    "vuetify": "^3.1.11"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
