@@ -3,8 +3,6 @@
     id="app"
     class="app"
   >
-    <v-container class="container">
-      <router-view />
-    </v-container>
+    <router-view />
   </v-app>
 </template>

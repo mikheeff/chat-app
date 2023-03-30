@@ -7,8 +7,11 @@ export class WebsocketConnection {
         this.socket = io('localhost:3000');
     }
 
-    send (message) {
-        console.log(message)
-        this.socket.emit('SEND_MESSAGE', message)
+    send (key, message, callback) {
+        this.socket.emit(key, message, callback)
+    }
+
+    on (key, callback) {
+        this.socket.on(key, callback)
     }
 }
