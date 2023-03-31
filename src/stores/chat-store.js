@@ -8,7 +8,10 @@ export const useChatStore = defineStore('chatStore',{
     username: '',
     room: '',
     sessionId: null,
+    newMessage: '',
+    isLoading: false,
     messages: [],
+    users: [],
     websocketConnection: null
   }),
   actions: {
@@ -17,15 +20,32 @@ export const useChatStore = defineStore('chatStore',{
       this.websocketConnection.on(ChatEvent.NEW_MESSAGE, (message) => {
         this.messages = [...this.messages, message]
       })
+      this.websocketConnection.on(ChatEvent.UPDATE_USERS, (users) => {
+        this.users = users
+      })
     },
-    sendMessage (key, message, callback) {
-      this.websocketConnection.send(key, message, callback)
+    sendMessage () {
+      this.websocketConnection.send(ChatEvent.CREATE_MESSAGE, {
+        text: this.newMessage,
+        id: this.sessionId
+      }, (data) => {
+        if (typeof data === 'string') {
+          console.error('Message error')
+
+          return
+        }
+
+        this.newMessage = ''
+      })
     },
     joinChat () {
-      this.sendMessage(ChatEvent.USER_JOINED, {
+      this.isLoading = true
+      this.websocketConnection.send(ChatEvent.USER_JOINED, {
         name: this.username,
         room: this.room
       }, (data) => {
+        this.isLoading = false
+
         if (typeof data === 'string') {
           console.error(data)
 
@@ -34,6 +54,12 @@ export const useChatStore = defineStore('chatStore',{
 
         this.sessionId = data.sessionId
         router.push({ name: 'chat' })
+      })
+    },
+    leaveChat() {
+      this.websocketConnection.send(ChatEvent.LEAVE_CHAT, this.sessionId, async () => {
+        await router.push({ name: 'home', query: { message: 'leftChat' } })
+        this.$reset()
       })
     }
   }

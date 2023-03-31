@@ -14,7 +14,7 @@
         <v-btn
           variant="text"
           icon="mdi-chevron-left"
-          @click="leaveChat"
+          @click="chatStore.leaveChat()"
         />
       </v-app-bar>
 
@@ -26,11 +26,12 @@
         <v-list>
           <v-list-subheader>Users</v-list-subheader>
           <v-list-item
-            v-for="user in items"
+            v-for="user in chatStore.users"
             :key="user.title"
             prepend-icon="mdi-account"
-            :title="user.title"
-            :value="user.value"
+            class="list-item"
+            :class="{'is-owner': user.id === chatStore.sessionId}"
+            :title="user.name"
             :active="false"
             :link="false"
           />
@@ -38,15 +39,22 @@
       </v-navigation-drawer>
 
       <v-main style="height: 500px;">
-        <v-card-text>
-          <ul>
-            <li
+        <v-card-text class="chat">
+          <ul class="chat-messages">
+            <ChatMessage
               v-for="(message, index) in chatStore.messages"
               :key="index"
-            >
-              {{ message.text }}
-            </li>
+              :message="message"
+              :is-owner="message.id === chatStore.sessionId"
+            />
           </ul>
+          <div class="chat-form">
+            <v-text-field
+              v-model="chatStore.newMessage"
+              label="Text"
+              @keydown.enter="chatStore.sendMessage()"
+            />
+          </div>
         </v-card-text>
       </v-main>
     </v-layout>
@@ -56,43 +64,33 @@
 <script setup>
   import { onBeforeRouteLeave, useRouter } from 'vue-router'
   import { useChatStore } from '../stores/chat-store'
-  import { reactive, toRefs } from 'vue'
+  import ChatMessage from '../components/ChatMessage.vue'
 
   const chatStore = useChatStore()
-  const router = useRouter()
-
-  const state = reactive({
-    group: null,
-    items: [
-      {
-        title: 'Foo',
-        value: 'foo',
-      },
-      {
-        title: 'Bar',
-        value: 'bar',
-      },
-      {
-        title: 'Fizz',
-        value: 'fizz',
-      },
-      {
-        title: 'Buzz',
-        value: 'buzz',
-      },
-    ],
-  })
 
 
   onBeforeRouteLeave((_to, _from, next) => {
     document.title = 'Welcome to chat app'
     next()
   })
+</script>
 
-  const leaveChat = async () => {
-    await router.push({ name: 'home', query: { message: 'leftChat' } })
-    chatStore.$reset()
+<style lang="scss" scoped>
+
+  .chat {
+    position: relative;
+    height: 100%;
+
+    .chat-messages {
+      height: 348px;
+      overflow-y: auto;
+    }
   }
 
-  const {items} = toRefs(state)
-</script>
+  .list-item {
+    &.is-owner {
+      color: blue;
+    }
+  }
+
+</style>

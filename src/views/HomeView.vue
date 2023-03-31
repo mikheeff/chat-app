@@ -30,6 +30,7 @@
               color="success"
               class="mt-4"
               block
+              :disabled="chatStore.isLoading"
               @click="enter"
             >
               Enter
