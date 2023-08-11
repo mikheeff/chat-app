@@ -20,6 +20,7 @@ const ChatEvent = {
 const users = require('./users')()
 const getMessage = (name, text, id) => ({ name, text, id })
 const removeUser = (id) => {
+    setTimeout()
     const user = users.remove(id)
 
     if (user) {
